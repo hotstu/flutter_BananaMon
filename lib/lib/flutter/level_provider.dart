@@ -1,6 +1,8 @@
 
-import 'resourcProvider.dart';
+import 'dart:typed_data';
+
 import '../level_provider.dart' as base;
+import 'package:flutter/services.dart' show rootBundle;
 
 class LevelProvider extends base.LevelProvider {
   static LevelProvider instance;
@@ -14,9 +16,14 @@ class LevelProvider extends base.LevelProvider {
     return instance;
   }
 
+  readFile(path) async {
+    ByteData data = await rootBundle.load(path);
+    return data.buffer.asUint8List();
+  }
+
   @override
   getRawData(String name) async {
-    final path = "/resource/level/${name}.png";
+    final path = "resource/level/${name}.png";
     return await readFile(path);
   }
 }

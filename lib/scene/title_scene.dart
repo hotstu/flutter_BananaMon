@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../lib/flutter/resourcProvider.dart';
 
 import '../char/mixin/keyboardWatcher.dart';
@@ -16,32 +18,35 @@ class TitleScene extends Scene with KeyBoardWatcher {
   Keyboard keyboard;
   AudioManager audio;
   SoundPlay bgm;
+  Object lock;
+  num fraction;
 
   TitleScene(this.game)
       : this.keyboard = inject.injectKeyboard(),
         resourceProvider = inject.injectResourceProvider(),
         audio = inject.injectAudio();
 
-  preload(CanvasWrapper ctx) async {
+  Future preload() async {
     // load resouce;
     int current = 0;
     int total = 11 + 8; //对应resoureProvider+audioManager资源总量
-    _drawProgress(ctx, current, total);
     await for (var i in audio.init()) {
       current += 1;
-      _drawProgress(ctx, current, total);
+      fraction = current/total;
     }
     await for (var i in resourceProvider.init()) {
       current += 1;
-      _drawProgress(ctx, current, total);
+      fraction = current/total;
     }
+    keyboard.init();
     keyboard.addListener(this);
     bgm = audio.play("opening", true);
-    state = Scene.SCENE_STATE_READY;
   }
 
-  _drawProgress(CanvasWrapper ctx, current, total) {
-    int progress = (current / total * 100).round();
+  _drawProgress(CanvasWrapper ctx) {
+    double f = fraction??0.0;
+
+    int progress = (f * 100).round();
     String msg = "loading...%${progress}";
     print(msg);
     int fontHeight = 50;
@@ -57,19 +62,20 @@ class TitleScene extends Scene with KeyBoardWatcher {
     ctx.restore();
   }
 
-  _drawOnce(CanvasWrapper ctx) async {
+  _drawOnce() async {
     TimerStream timer = TimerStream(Duration(milliseconds: 30), 10);
     await for (var tick in timer.stream) {
-      _drawTranslation(ctx, tick / 10);
+      fraction =  (tick + 1) / 10;
     }
   }
 
   /**
    * @Param fraction [0,1]
    */
-  _drawTranslation(CanvasWrapper ctx, num fraction) {
-    print("draw");
-    ctx.setBrush("white");
+  _drawTranslation(CanvasWrapper ctx ) {
+    double f = fraction??0.0;
+
+    ctx.setBrush("#fff");
     ctx.setFont("50px Pokemon Bold");
     String msg = "BananaMon";
     num fontWidth = ctx.measureText(msg);
@@ -77,7 +83,7 @@ class TitleScene extends Scene with KeyBoardWatcher {
     ctx.save();
     num transX = ctx.width * .5 - fontWidth * .5;
     num transY = ctx.height * .5 - 50 * .5;
-    ctx.translate(transX, transY * fraction);
+    ctx.translate(transX, transY * f);
     ctx.rfillText(0, 0, msg);
     ctx.restore();
     ctx.setFont("30px Pokemon regular");
@@ -85,14 +91,13 @@ class TitleScene extends Scene with KeyBoardWatcher {
     String msg2 = "press anykey to start";
     String msg3 = "© 2018 hglf@github All Rights Reserved";
     ctx.save();
-    ctx.setBrush("rgba(255,255,255,${0.8 * fraction})");
+    ctx.setBrush("rgba(255,255,255,${0.8 * f})");
     fontWidth = ctx.measureText(msg2);
     ctx.translate(ctx.width * .5 - fontWidth * .5, ctx.height - 100);
     ctx.rfillText(0, 0, msg2);
     ctx.restore();
     ctx.save();
-    print(fraction);
-    ctx.setBrush("rgba(255,255,255,${0.8 * fraction})");
+    ctx.setBrush("rgba(255,255,255,${0.8 * f})");
     fontWidth = ctx.measureText(msg3);
     ctx.translate(ctx.width * .5 - fontWidth * .5, ctx.height - 60);
     ctx.rfillText(0, 0, msg3);
@@ -104,25 +109,48 @@ class TitleScene extends Scene with KeyBoardWatcher {
     bgm.stop();
     keyboard.removeListener(this);
     state = Scene.SCENE_STATE_DESTORY;
+    lock = null;
   }
 
   @override
-  tick() async {
-    print('"title tick');
-  }
-
-  draw(CanvasWrapper ctx) async {
-    print('"title draw');
+  tick() {
     if (state == Scene.SCENE_STATE_DESTORY) {
       return;
     }
     if (state == Scene.SCENE_STATE_INT) {
-      await preload(ctx);
-      await _drawOnce(ctx);
+      if (lock != null) {
+        return;
+      }
+      lock = 1;
+      fraction = 0.0;
+      preload().then((_) {
+        lock = 2;
+        return _drawOnce();
+      }).then((_) {
+        state = Scene.SCENE_STATE_READY;
+      });
       return;
     }
     if (state == Scene.SCENE_STATE_READY) {
+      return;
+    }
+  }
 
+  draw(CanvasWrapper ctx) async {
+    if (state == Scene.SCENE_STATE_DESTORY) {
+      return;
+    }
+    if (state == Scene.SCENE_STATE_INT) {
+      if(lock == 1) {
+        _drawProgress(ctx);
+      }
+      else if(lock == 2) {
+        _drawTranslation(ctx);
+      }
+      return;
+    }
+    if (state == Scene.SCENE_STATE_READY) {
+      _drawTranslation(ctx);
     }
   }
 

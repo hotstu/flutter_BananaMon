@@ -1,5 +1,4 @@
 import '../lib/chess_pad.dart';
-import '../lib/canvas_wrapper.dart';
 import '../lib/sprite.dart';
 import '../stage/stage.dart';
 import 'base_char.dart';
@@ -7,7 +6,6 @@ import 'bomb.dart';
 import 'brick.dart';
 import 'mixin/property.dart';
 import '../lib/constants.dart' as constants;
-import 'dart:math' as math;
 
 class Explosion extends BaseChar {
   List<Sprite> sps;
@@ -30,7 +28,7 @@ class Explosion extends BaseChar {
     growDirections = [0,1,2,3];
   }
 
-  Explosion._internal(String name, CanvasWrapper ctx, Stage stage, int x, int y)
+  Explosion._internal(String name, ctx, Stage stage, int x, int y)
       : super(name, ctx, stage,  x, y) {
   }
 

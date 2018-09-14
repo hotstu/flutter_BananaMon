@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import '../lib/canvas_wrapper.dart';
 
 import 'package:vector_math/vector_math.dart';
 
@@ -23,7 +22,7 @@ abstract class Treasure extends BaseChar {
   List<Sprite> sps;
   final Vector2 _zero2 = Vector2.zero();
 
-  Treasure(String name, CanvasWrapper ctx, Stage stage, [num x = 0, num y = 0])
+  Treasure(String name, ctx, Stage stage, [num x = 0, num y = 0])
       : super(name, ctx, stage, x, y) {
     sps = ctx.obtainSoureDesc(this.type);
   }
@@ -61,7 +60,7 @@ abstract class Treasure extends BaseChar {
 }
 
 class TreasureSpeedUp extends Treasure {
-  TreasureSpeedUp(String name, CanvasWrapper ctx, Stage stage, [int x = 0, int y = 0])
+  TreasureSpeedUp(String name, ctx, Stage stage, [int x = 0, int y = 0])
       : super(name, ctx, stage,x, y);
 
   @override
@@ -75,7 +74,7 @@ class TreasureSpeedUp extends Treasure {
 }
 
 class TreasurePowerUp extends Treasure {
-  TreasurePowerUp(String name, CanvasWrapper ctx, Stage stage, [int x = 0, int y = 0])
+  TreasurePowerUp(String name, ctx, Stage stage, [int x = 0, int y = 0])
       : super(name, ctx, stage,x, y);
 
   @override
@@ -89,7 +88,7 @@ class TreasurePowerUp extends Treasure {
 }
 
 class TreasureBombCountUp extends Treasure {
-  TreasureBombCountUp(String name, CanvasWrapper ctx, Stage stage, [int x = 0, int y = 0])
+  TreasureBombCountUp(String name, ctx, Stage stage, [int x = 0, int y = 0])
       : super(name, ctx, stage,x, y);
 
   @override
@@ -105,7 +104,7 @@ class TreasureBombCountUp extends Treasure {
 class TreasureBombType extends Treasure {
   String bombtype;
 
-  TreasureBombType(String name, CanvasWrapper ctx, Stage stage, this.bombtype,  [int x = 0, int y = 0])
+  TreasureBombType(String name, ctx, Stage stage, this.bombtype,  [int x = 0, int y = 0])
       : super(name, ctx, stage, x, y);
 
   @override
@@ -121,7 +120,7 @@ class TreasureBombType extends Treasure {
 class TreasureGate extends Treasure {
 
   bool applyed = false;
-  TreasureGate(String name, CanvasWrapper ctx, Stage stage,   [int x = 0, int y = 0])
+  TreasureGate(String name, ctx, Stage stage,   [int x = 0, int y = 0])
       : super(name, ctx, stage, x, y);
 
   @override

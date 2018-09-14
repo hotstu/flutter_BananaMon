@@ -6,5 +6,6 @@ abstract class Keyboard {
   removeListener(KeyBoardWatcher watcher);
   pause();
   stop();
+  init();
   start();
 }

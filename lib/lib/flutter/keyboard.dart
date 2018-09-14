@@ -30,34 +30,37 @@ class Keyboard extends base.Keyboard {
   }
 
   init() {
-    if(GestureBinding?.instance?.pointerRouter == null) {
+    if (GestureBinding?.instance?.pointerRouter == null) {
       return;
     }
     if (callback != null) {
       return;
     }
-    final recognizer = TapGestureRecognizer()..onTapDown = _onTapDown..onTapUp = _onTapUp;
+    final recognizer = TapGestureRecognizer()
+      ..onTapDown = _onTapDown
+      ..onTapUp = _onTapUp;
     callback = (PointerEvent e) {
-        if (e is PointerDownEvent) {
-          recognizer.addPointer(e);
-        }
+      if (e is PointerDownEvent) {
+        recognizer.addPointer(e);
+      }
     };
     GestureBinding.instance.pointerRouter.addGlobalRoute(callback);
   }
 
-  _onTapDown(TapDownDetails ev){
+  _onTapDown(TapDownDetails ev) {
     print("onTapDown${ev.globalPosition}");
     _keyDownControler.add(ev);
   }
-  _onTapUp(TapUpDetails ev){
+
+  _onTapUp(TapUpDetails ev) {
     print("onTapDown${ev.globalPosition}");
     _keyUpControler.add(ev);
   }
 
 
-
   @override
   void start() {
+    init();
     if (keydownSub != null) {
       if (keydownSub.isPaused) {
         keydownSub.resume();
@@ -67,7 +70,8 @@ class Keyboard extends base.Keyboard {
     keydownSub = _keyDownControler.stream.listen((event) {
       final keyCode = 0x58;
       _keys.putIfAbsent(keyCode, () => 1);
-      listeners.forEach((watcher) {
+
+      List.from(listeners).forEach((watcher) {
         watcher.onKeyDown(_mappingRev(keyCode));
       });
     });
@@ -75,7 +79,7 @@ class Keyboard extends base.Keyboard {
     keyupSub = _keyUpControler.stream.listen((event) {
       final keyCode = 0x58;
       _keys.remove(keyCode);
-      listeners.forEach((watcher) {
+       List.from(listeners).forEach((watcher) {
         watcher.onKeyUp(_mappingRev(keyCode));
       });
     });
@@ -147,18 +151,14 @@ class Keyboard extends base.Keyboard {
   bool isPressed(int keyCode) => _keys.containsKey(_mapping(keyCode));
 
   @override
-  addListener(KeyBoardWatcher watcher) async {
-    return Future.delayed(Duration.zero, () {
-      if (listeners.indexOf(watcher) == -1) {
-        listeners.add(watcher);
-      }
-    });
+  addListener(KeyBoardWatcher watcher) {
+    if (listeners.indexOf(watcher) == -1) {
+      listeners.add(watcher);
+    }
   }
 
   @override
   removeListener(KeyBoardWatcher watcher) async {
-    return Future.delayed(Duration.zero, () {
-      listeners.remove(watcher);
-    });
+    listeners.remove(watcher);
   }
 }

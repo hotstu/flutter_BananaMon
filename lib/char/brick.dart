@@ -1,5 +1,3 @@
-import '../lib/canvas_wrapper.dart';
-
 import 'package:vector_math/vector_math.dart';
 
 import '../lib/sprite.dart';
@@ -12,7 +10,7 @@ class Brick extends BaseChar {
   List<Sprite> sps;
   final Vector2 _zero2 = Vector2.zero();
 
-  Brick(String name, CanvasWrapper ctx, Stage stage,[num x = 0, num y = 0])
+  Brick(String name, ctx, Stage stage,[num x = 0, num y = 0])
       : super(name, ctx, stage, x, y) {
     sps = ctx.obtainSoureDesc(this.type);
   }
@@ -44,7 +42,7 @@ class WeakBrick extends Brick {
   Animator anim = null;
   List<Sprite> sps2;
 
-  WeakBrick(String name, CanvasWrapper ctx, Stage stage,[num x = 0, num y = 0]) : super(name, ctx, stage,x, y ){
+  WeakBrick(String name, ctx, Stage stage,[num x = 0, num y = 0]) : super(name, ctx, stage,x, y ){
     sps2 = ctx.obtainSoureDesc(constants.sourceIdDestory2);
   }
 

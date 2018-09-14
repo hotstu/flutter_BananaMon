@@ -14,29 +14,25 @@ class StageLoaderScene extends Scene {
   ResourceProvider resourceProvider;
   CanvasWrapper ctx;
   AudioManager audio;
+  num fraction;
+  Object lock;
 
   StageLoaderScene(this.game)
       : resourceProvider = inject.injectResourceProvider(),
         audio = inject.injectAudio() {}
 
-  preload() async {
-    // load resouce;
-    state = Scene.SCENE_STATE_READY;
-  }
 
-  _drawOnce() async {
+  Future _drawOnce() async {
     TimerStream timer = TimerStream(Duration(milliseconds: 30), 10);
     await for (var tick in timer.stream) {
-      _drawTranslation(tick / 10);
+      fraction = ((tick + 1) / 10);
     }
   }
 
-  /**
-   * @Param fraction [0,1]
-   */
-  _drawTranslation(num fraction) {
-    print("draw");
-    ctx.setBrush("white");
+  _drawTranslation() {
+    //print("draw");
+    double f = fraction??0.0;
+    ctx.setBrush("#fff");
     ctx.setFont("30px Pokemon regular");
     String msg = "$attr";
     num fontWidth = ctx.measureText(msg);
@@ -44,7 +40,7 @@ class StageLoaderScene extends Scene {
     ctx.save();
     num transX = ctx.width * .5 - fontWidth * .5;
     num transY = ctx.height * .5 - 50 * .5;
-    ctx.translate(transX, transY * fraction);
+    ctx.translate(transX, transY * f);
     ctx.rfillText(0, 0, msg);
     ctx.restore();
   }
@@ -52,6 +48,7 @@ class StageLoaderScene extends Scene {
   @override
   destroy() {
     state = Scene.SCENE_STATE_DESTORY;
+    lock = null;
   }
 
   _openStage() async {
@@ -61,27 +58,39 @@ class StageLoaderScene extends Scene {
 
   @override
   tick() async {
-
+    print("loader tick");
+    if (state == Scene.SCENE_STATE_DESTORY) {
+      return;
+    }
+    if (state == Scene.SCENE_STATE_INT) {
+      if (lock == null) {
+        lock = 1;
+        _drawOnce().then((_) {
+          return _openStage();
+        }).then((_) {
+          state = Scene.SCENE_STATE_READY;
+        });
+      }
+      return;
+    }
+    if (state == Scene.SCENE_STATE_READY) {}
   }
 
   @override
-  draw(CanvasWrapper ctx) async {
+  draw(CanvasWrapper ctx) {
+    print("loader draw");
+
     if (state == Scene.SCENE_STATE_DESTORY) {
       return;
     }
     if (state == Scene.SCENE_STATE_INT) {
       this.ctx = ctx;
-      await preload();
-      print("start laoder 1");
-      await _drawOnce();
-      print("start laoder 2");
-      await _openStage();
-      print("start laoder 3");
+      if(lock != null) {
+        _drawTranslation();
+      }
       this.ctx = null;
       return;
     }
-    print("start laoder 4");
-
     if (state == Scene.SCENE_STATE_READY) {}
   }
 

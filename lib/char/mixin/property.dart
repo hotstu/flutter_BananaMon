@@ -1,9 +1,9 @@
 import 'package:vector_math/vector_math.dart';
 
 import '../../lib/chess_pad.dart';
-import '../../lib/canvas_wrapper.dart';
 import '../../lib/rect.dart';
 import '../../lib/sprite.dart';
+import '../../lib/flutter/projection.dart';
 
 
 abstract class Property {
@@ -14,7 +14,7 @@ abstract class Property {
   double get iq;
   Rect<num> get rect;
 
-  CanvasWrapper get ctx;
+  Context get ctx;
   ChessPad get chessPad;
   Vector2 get v;
 }

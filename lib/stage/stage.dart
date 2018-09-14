@@ -1,5 +1,6 @@
 import 'dart:async';
 
+
 import '../char/base_char.dart';
 import '../char/bomb.dart';
 import '../char/explosion.dart';
@@ -15,11 +16,14 @@ import '../scene/scene.dart';
 import '../lib/level_provider.dart';
 import '../lib/timer_stream.dart';
 import 'stage_model.dart';
+import '../lib/flutter/projection.dart';
 import '../lib/injection.dart' as inject;
 import '../lib/constants.dart' as constants;
 
 class Stage extends Scene {
   final LevelProvider levelProvider;
+  final Context context;
+
   CanvasWrapper canvas;
   String level;
 
@@ -36,7 +40,7 @@ class Stage extends Scene {
   SoundPlay bgmPlay;
   GameHandler _game;
 
-  Stage(this._game)
+  Stage(this._game, this.context)
       : levelProvider = inject.injectLevelProvider(),
         audio = inject.injectAudio();
 
@@ -45,7 +49,7 @@ class Stage extends Scene {
     assert(attr != null);
     level = attr;
     sm = await levelProvider.obtain(level);
-    chessPad = new ChessPad(canvas, sm.width, sm.height); //按区块存储char，便于快速查询
+    chessPad = new ChessPad(context, sm.width, sm.height); //按区块存储char，便于快速查询
     wallList1 = [];
     wallList2 = [];
     monsterList = [];
@@ -57,11 +61,11 @@ class Stage extends Scene {
         var wallPhase = sm.wallPhase[i][j];
         if (wallPhase == 0x7f) {
           //wall1;
-          var softWallBlock = WeakBrick("block${i}-${j}", canvas, this, i, j);
+          var softWallBlock = WeakBrick("block${i}-${j}", context, this, i, j);
           wallList1.add(softWallBlock);
         } else if (wallPhase == 0xff) {
           //wall2;
-          var wallBlock = Brick("block${i}-${j}", canvas, this, i, j);
+          var wallBlock = Brick("block${i}-${j}", context, this, i, j);
           wallList2.add(wallBlock);
         }
         var monsterPhase = sm.monsterPhase[i][j];
@@ -71,7 +75,7 @@ class Stage extends Scene {
           print("${monsterPhase} -${monsterType} -$monsterCount");
           switch (monsterType) {
             case 0:
-              heroList.add(Hero("hero${i}-${j}", canvas, this, i, j));
+              heroList.add(Hero("hero${i}-${j}", context, this, i, j));
               break;
             case 1:
             case 2:
@@ -90,7 +94,7 @@ class Stage extends Scene {
             case 15:
               for (var k = 0; k < monsterCount; ++k) {
                 monsterList
-                    .add(Monster("monster${i}-${j}-${k}", canvas, this, i, j));
+                    .add(Monster("monster${i}-${j}-${k}", context, this, i, j));
               }
               break;
             default:
@@ -102,23 +106,24 @@ class Stage extends Scene {
           int treasureType = (treasurePhase & 0xf0) ~/ 0x10;
           switch (treasureType) {
             case 0:
-              treasureList.add(TreasureGate("tr${i}-${j}", canvas, this, i, j));
+              treasureList.add(
+                  TreasureGate("tr${i}-${j}", context, this, i, j));
               break;
             case 1:
-              treasureList
-                  .add(TreasureBombCountUp("tr${i}-${j}", canvas, this, i, j));
+              treasureList.add(
+                  TreasureBombCountUp("tr${i}-${j}", context, this, i, j));
               break;
             case 2:
-              treasureList
-                  .add(TreasurePowerUp("tr${i}-${j}", canvas, this, i, j));
+              treasureList.add(
+                  TreasurePowerUp("tr${i}-${j}", context, this, i, j));
               break;
             case 3:
-              treasureList
-                  .add(TreasureSpeedUp("tr${i}-${j}", canvas, this, i, j));
+              treasureList.add(
+                  TreasureSpeedUp("tr${i}-${j}", context, this, i, j));
               break;
             case 4:
               treasureList.add(
-                  TreasureBombType("tr${i}-${j}", canvas, this, "2", i, j));
+                  TreasureBombType("tr${i}-${j}", context, this, "2", i, j));
               break;
 
             default:
@@ -138,6 +143,7 @@ class Stage extends Scene {
   }
 
   bool _paused = false;
+
   @override
   void pause() {
     _paused = true;
@@ -157,7 +163,7 @@ class Stage extends Scene {
       await _init();
       return;
     }
-    if(!_paused) {
+    if (!_paused) {
       _think();
     }
   }
@@ -168,105 +174,101 @@ class Stage extends Scene {
     this.canvas = null;
   }
 
-  add(BaseChar char) async {
-    return Future.delayed(Duration.zero).then((_) {
-      if (char is WeakBrick) {
-        if (!wallList1.contains(char)) {
-          wallList1.add(char);
-        }
-        return;
+  add(BaseChar char) {
+    if (char is WeakBrick) {
+      if (!wallList1.contains(char)) {
+        wallList1.add(char);
       }
-      if (char is Block) {
-        if (!wallList2.contains(char)) {
-          wallList2.add(char);
-        }
-        return;
+      return;
+    }
+    if (char is Block) {
+      if (!wallList2.contains(char)) {
+        wallList2.add(char);
       }
-      if (char is Monster) {
-        if (!monsterList.contains(char)) {
-          monsterList.add(char);
-        }
-        return;
+      return;
+    }
+    if (char is Monster) {
+      if (!monsterList.contains(char)) {
+        monsterList.add(char);
       }
-      if (char is Hero) {
-        if (!heroList.contains(char)) {
-          heroList.add(char);
-        }
-        return;
+      return;
+    }
+    if (char is Hero) {
+      if (!heroList.contains(char)) {
+        heroList.add(char);
       }
-      if (char is Bomb) {
-        if (!bombList.contains(char)) {
-          bombList.add(char);
-        }
-        return;
+      return;
+    }
+    if (char is Bomb) {
+      if (!bombList.contains(char)) {
+        bombList.add(char);
       }
-      if (char is Explosion) {
-        if (!expList.contains(char)) {
-          expList.add(char);
-        }
-        return;
+      return;
+    }
+    if (char is Explosion) {
+      if (!expList.contains(char)) {
+        expList.add(char);
       }
-      if (char is Treasure) {
-        if (!treasureList.contains(char)) {
-          treasureList.add(char);
-        }
-        return;
+      return;
+    }
+    if (char is Treasure) {
+      if (!treasureList.contains(char)) {
+        treasureList.add(char);
       }
-    });
+      return;
+    }
   }
 
-  remove(BaseChar char) async {
-    return Future.delayed(Duration.zero).then((_) {
-      if (char is WeakBrick) {
-        wallList1.remove(char);
-        return;
-      }
-      if (char is Block) {
-        wallList2.remove(char);
-        return;
-      }
-      if (char is Monster) {
-        monsterList.remove(char);
-        return;
-      }
-      if (char is Hero) {
-        heroList.remove(char);
-        return;
-      }
-      if (char is Bomb) {
-        bombList.remove(char);
-        return;
-      }
-      if (char is Explosion) {
-        expList.remove(char);
-        return;
-      }
-      if (char is Treasure) {
-        treasureList.remove(char);
-        return;
-      }
-    });
+  remove(BaseChar char) {
+    if (char is WeakBrick) {
+      wallList1.remove(char);
+      return;
+    }
+    if (char is Block) {
+      wallList2.remove(char);
+      return;
+    }
+    if (char is Monster) {
+      monsterList.remove(char);
+      return;
+    }
+    if (char is Hero) {
+      heroList.remove(char);
+      return;
+    }
+    if (char is Bomb) {
+      bombList.remove(char);
+      return;
+    }
+    if (char is Explosion) {
+      expList.remove(char);
+      return;
+    }
+    if (char is Treasure) {
+      treasureList.remove(char);
+      return;
+    }
   }
 
   void _draw() {
     //now only support one player!
-    canvas.rclearRect(-1, -1);
-    wallList2.forEach((item) => item.draw());
-    treasureList.forEach((item) => item.draw());
-    wallList1.forEach((item) => item.draw());
-    expList.forEach((item) => item.draw());
-    bombList.forEach((item) => item.draw());
-    monsterList.forEach((item) => item.draw());
-    heroList.forEach((item) => item.draw());
+    //canvas.rclearRect(-1, -1);
+    wallList2.forEach((item) => item.draw(canvas));
+    treasureList.forEach((item) => item.draw(canvas));
+    wallList1.forEach((item) => item.draw(canvas));
+    expList.forEach((item) => item.draw(canvas));
+    bombList.forEach((item) => item.draw(canvas));
+    monsterList.forEach((item) => item.draw(canvas));
+    heroList.forEach((item) => item.draw(canvas));
   }
 
   void _think() {
-    heroList.forEach((item) => item.tick());
+    List.from(heroList, growable: false).forEach((item) => item.tick());
     //wallList2.forEach((item) => item.tick());
-    wallList1.forEach((item) => item.tick());
-    monsterList.forEach((item) => item.tick());
-    bombList.forEach((item) => item.tick());
-    expList.forEach((item) => item.tick());
+    List.from(wallList1, growable: false).forEach((item) => item.tick());
+    List.from(monsterList, growable: false).forEach((item) => item.tick());
+    List.from(bombList, growable: false).forEach((item) => item.tick());
+    List.from(expList, growable: false).forEach((item) => item.tick());
   }
 
   Future _ifWin() async {
@@ -312,13 +314,13 @@ class Stage extends Scene {
   @override
   void destroy() {
     bgmPlay?.stop();
-    new List.from(wallList1).forEach((e) => e?.destroy(false));
-    new List.from(treasureList).forEach((e) => e?.destroy(false));
-    new List.from(wallList2).forEach((e) => e?.destroy(false));
-    new List.from(monsterList).forEach((e) => e?.destroy(false));
-    new List.from(heroList).forEach((e) => e?.destroy(false));
-    new List.from(bombList).forEach((e) => e?.destroy(false));
-    new List.from(expList).forEach((e) => e?.destroy(false));
+    List.from(wallList1, growable: false).forEach((e) => e?.destroy(false));
+    List.from(treasureList, growable: false).forEach((e) => e?.destroy(false));
+    List.from(wallList2, growable: false).forEach((e) => e?.destroy(false));
+    List.from(monsterList, growable: false).forEach((e) => e?.destroy(false));
+    List.from(heroList, growable: false).forEach((e) => e?.destroy(false));
+    List.from(bombList, growable: false).forEach((e) => e?.destroy(false));
+    List.from(expList, growable: false).forEach((e) => e?.destroy(false));
     state = Scene.SCENE_STATE_DESTORY;
   }
 

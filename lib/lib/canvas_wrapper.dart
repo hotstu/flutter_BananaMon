@@ -6,9 +6,9 @@ import 'sprite.dart';
 
 abstract class CanvasWrapper {
 
-  num get height;
   num get width;
-
+  num get height;
+  String exportBitmap(dynamic v);
   void setFont(String font);
 
   void save();
@@ -39,19 +39,4 @@ abstract class CanvasWrapper {
 
   void rdrawImage(Sprite drawable, Rectangle<num> rect);
 
-  /**
-   * 类似于Math.floor
-   */
-  Vector2 py2loProjection(Vector2 p);
-
-  /**
-   * 左上角重合
-   */
-  Vector2 lo2pyProjection(Vector2 p);
-
-
-
-  String exportBitmap(image);
-
-  List<Sprite> obtainSoureDesc(String type);
 }

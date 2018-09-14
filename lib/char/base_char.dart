@@ -1,18 +1,18 @@
 import 'package:vector_math/vector_math.dart';
 
 import '../lib/chess_pad.dart';
-import '../lib/canvas_wrapper.dart';
 
 import '../lib/rect.dart';
 import '../stage/stage.dart';
 import 'mixin/property.dart';
 import 'mixin/viewItem.dart';
+import '../lib/flutter/projection.dart';
 import '../lib/constants.dart' as constants;
 
 
 abstract class BaseChar extends Object with Property, ViewItem {
   final String name;
-  final CanvasWrapper ctx;
+  final Context ctx;
   final Stage stage;
   Rect<num> rect;
   Block current;

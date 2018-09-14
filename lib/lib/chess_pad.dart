@@ -3,13 +3,13 @@ import 'package:vector_math/vector_math.dart';
 import '../char/base_char.dart';
 import '../char/brick.dart';
 import '../stage/stage_model.dart';
-import 'canvas_wrapper.dart';
+import '../lib/flutter/projection.dart';
 import 'rect.dart';
 
 class ChessPad extends Array2d<Block> {
   final num width;
   final num height;
-  final CanvasWrapper ctx;
+  final Context ctx;
 
   ChessPad(this.ctx, num this.width, num this.height)
       : super(width, height,

@@ -4,45 +4,37 @@ import 'dart:ui' hide TextStyle;
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math.dart';
 
-import 'resourcProvider.dart';
 import '../canvas_wrapper.dart' as base;
 import '../sprite.dart';
-import '../injection.dart' as inject;
 import 'color_parser.dart';
+import 'projection.dart';
 
 
 class CanvasWrapper implements base.CanvasWrapper {
   final Canvas ctx;
-  final ResourceProvider resourceProvider;
-  final num p_width;
-  final num p_height;
-  final num l_width;
-  final num l_height;
-  final num CELL_SIZE_W;
-  final num CELL_SIZE_H;
+  final Context C;
 
   Paint _clearPaint;
   Paint _colorPaint;
+  Paint _tilePaint;
   TextPainter _textPainter;
   Color _textColor;
   String _textFont;
-  num _textSize;
+  num _textSize = 25.0;
   bool _dirty = true;
   String _lastText;
 
 
-  CanvasWrapper(this.ctx, Size size, this.l_height, this.l_width)
-      : p_width = size.width,
-        p_height = size.height,
-        resourceProvider = inject.injectResourceProvider(),
-        CELL_SIZE_W = 40.0,
-        CELL_SIZE_H = 40.0 {
+  CanvasWrapper(this.ctx,this.C) {
     _clearPaint = Paint();
     _clearPaint.blendMode = BlendMode.clear;
     _clearPaint.style = PaintingStyle.fill;
     _colorPaint = Paint();
     _colorPaint.blendMode = BlendMode.src;
     _colorPaint.style = PaintingStyle.fill;
+    _tilePaint = Paint();
+    _tilePaint.blendMode = BlendMode.srcATop;
+    _tilePaint.style = PaintingStyle.fill;
   }
 
   @override
@@ -92,21 +84,21 @@ class CanvasWrapper implements base.CanvasWrapper {
 
   @override
   void clearRect(int x, int y) {
-    var pyP = lo2pyProjection(Vector2(x.toDouble(), y.toDouble()));
-    ctx.drawRect(Rect.fromLTWH(pyP.x, pyP.y, CELL_SIZE_W.toDouble(), CELL_SIZE_H.toDouble()), _clearPaint);
+    var pyP = C.lo2pyProjection(Vector2(x.toDouble(), y.toDouble()));
+    ctx.drawRect(Rect.fromLTWH(pyP.x, pyP.y, C.CELL_SIZE_W.toDouble(), C.CELL_SIZE_H.toDouble()), _clearPaint);
   }
 
   @override
   void fillRect(int x, int y) {
-    var pyP = lo2pyProjection(Vector2(x.toDouble(), y.toDouble()));
-    ctx.drawRect(Rect.fromLTWH(pyP.x, pyP.y, CELL_SIZE_W.toDouble(), CELL_SIZE_H.toDouble()), _colorPaint);
+    var pyP = C.lo2pyProjection(Vector2(x.toDouble(), y.toDouble()));
+    ctx.drawRect(Rect.fromLTWH(pyP.x, pyP.y, C.CELL_SIZE_W.toDouble(), C.CELL_SIZE_H.toDouble()), _colorPaint);
   }
 
   @override
   void fillText(int x, int y, String text) {
-    var pyP = lo2pyProjection(Vector2(x.toDouble(), y.toDouble()));
+    var pyP = C.lo2pyProjection(Vector2(x.toDouble(), y.toDouble()));
     ctx.save();
-    ctx.translate(-(pyP.x + .5 * CELL_SIZE_W), -(pyP.y + .5 * CELL_SIZE_H));
+    ctx.translate(-(pyP.x + .5 * C.CELL_SIZE_W), -(pyP.y + .5 * C.CELL_SIZE_H));
     _ensureTextPaint(text);
     _textPainter.paint(ctx, Offset.zero);
     ctx.restore();
@@ -121,43 +113,22 @@ class CanvasWrapper implements base.CanvasWrapper {
     ctx.restore();
   }
 
-  @override
-  Vector2 py2loProjection(Vector2 p) {
-    num x = (p.x) * l_width ~/ p_width;
-    num y = (p.y) * l_height ~/ p_height;
-    return Vector2(x, y);
-  }
-
-  @override
-  Vector2 lo2pyProjection(Vector2 p) {
-    num x = (p.x) / l_width * p_width;
-    num y = (p.y) / l_height * p_height;
-    return Vector2(x, y);
-  }
-
-
-  String exportBitmap(image) {
-    return "not support";
-  }
 
   @override
   void rclearRect(num x, num y) {
     if (x == -1 && y == -1) {
-      ctx.drawRect(Rect.fromLTWH(0.0, 0.0, p_width.toDouble(), p_height.toDouble()), _clearPaint);
+      ctx.drawRect(Rect.fromLTWH(0.0, 0.0, C.p_width.toDouble(), C.p_height.toDouble()), _clearPaint);
     } else {
-      ctx.drawRect(Rect.fromLTWH(x.toDouble(), y.toDouble(), CELL_SIZE_W.toDouble(), CELL_SIZE_H.toDouble()),_clearPaint);
+      ctx.drawRect(Rect.fromLTWH(x.toDouble(), y.toDouble(), C.CELL_SIZE_W.toDouble(), C.CELL_SIZE_H.toDouble()),_clearPaint);
     }
   }
 
   @override
   void rfillRect(num x, num y) {
-    ctx.drawRect(Rect.fromLTWH(x.toDouble(), y.toDouble(), CELL_SIZE_W.toDouble(), CELL_SIZE_H.toDouble()), _colorPaint);
+    ctx.drawRect(Rect.fromLTWH(x.toDouble(), y.toDouble(), C.CELL_SIZE_W.toDouble(), C.CELL_SIZE_H.toDouble()), _colorPaint);
   }
 
-  Image _obtainSoureByName(String name) {
-    // all the image source should managed by this instance;
-    return resourceProvider.obtainSoureByName(name);
-  }
+
 
   @override
   void rdrawImage(Sprite drawable, Rectangle<num> rect) {
@@ -169,22 +140,12 @@ class CanvasWrapper implements base.CanvasWrapper {
     Rect dRect = Rect.fromLTWH(
         rect.left + drawable.dst.left + .0,
         rect.top + drawable.dst.top + .0,
-        drawable.dst.width <= 0 ? CELL_SIZE_W.toDouble() : drawable.dst.width.toDouble(),
-        drawable.dst.height <= 0 ? CELL_SIZE_H.toDouble() : drawable.dst.height.toDouble());
-    ctx.drawImageRect(_obtainSoureByName(drawable.sourceId), srcRect, dRect, _colorPaint);
+        drawable.dst.width <= 0 ? C.CELL_SIZE_W.toDouble() : drawable.dst.width.toDouble(),
+        drawable.dst.height <= 0 ? C.CELL_SIZE_H.toDouble() : drawable.dst.height.toDouble());
+    ctx.drawImageRect(C.obtainSoureByName(drawable.sourceId), srcRect, dRect, _tilePaint);
 
   }
 
-  @override
-  List<Sprite> obtainSoureDesc(String type) {
-    return resourceProvider.obtainSoureDesc(type);
-  }
-
-  @override
-  num get height => p_height;
-
-  @override
-  num get width => p_width;
 
   @override
   void restore() {
@@ -214,5 +175,18 @@ class CanvasWrapper implements base.CanvasWrapper {
   @override
   void rotate(num angle) {
     ctx.rotate(angle + .0);
+  }
+
+  // TODO: implement height
+  @override
+  num get height => C.p_height;
+
+  // TODO: implement width
+  @override
+  num get width => C.p_width;
+
+  @override
+  String exportBitmap(v) {
+    return "not support in flutter";
   }
 }
