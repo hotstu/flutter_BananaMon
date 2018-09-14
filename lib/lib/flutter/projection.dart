@@ -1,8 +1,9 @@
 import 'dart:ui';
 
 import 'package:vector_math/vector_math.dart';
-import 'resourcProvider.dart';
 
+import 'resourcProvider.dart';
+import '../../game.dart';
 import '../sprite.dart';
 import '../injection.dart' as inject;
 
@@ -14,8 +15,9 @@ class Context {
   final num CELL_SIZE_W;
   final num CELL_SIZE_H;
   final ResourceProvider resourceProvider;
+  final BaseGame game;
 
-  Context(this.p_width, this.p_height, this.l_width, this.l_height)
+  Context(this.game, this.p_width, this.p_height, this.l_width, this.l_height)
       :resourceProvider = inject.injectResourceProvider(),
         CELL_SIZE_W = 40.0,
         CELL_SIZE_H = 40.0;

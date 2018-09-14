@@ -28,7 +28,7 @@ class MyGame extends BaseGame {
   MyGame() {
     started = false;
     map = new HashMap();
-    context = Context(1240, 600, constatns.logicalWidth, constatns.logicalHeight);
+    context = Context(this, 1240, 600, constatns.logicalWidth, constatns.logicalHeight);
     hud = HUD(context);
   }
 
@@ -56,12 +56,12 @@ class MyGame extends BaseGame {
   bool debugMode() => true;
 
   @override
-  render(Canvas canvas)  {
-    canvas.drawColor(Colors.white70, BlendMode.src);
+  render(Canvas canvas) {
+    canvas.drawColor(Colors.brown, BlendMode.src);
     canvas.save();
-    num sx = size.width/context.p_width;
-    num sy = size.height/context.p_height;
-    //print("reander $sx, $sy");
+    num sx = size.width / context.p_width;
+    num sy = size.height / context.p_height;
+    //print("reander $size");
     canvas.scale(sx, sy);
     CanvasWrapper wrapper = CanvasWrapper(canvas, context);
     map[senceName]?.draw(wrapper);
