@@ -40,7 +40,7 @@ class TitleScene extends Scene with KeyBoardWatcher {
     }
     keyboard.init();
     keyboard.addListener(this);
-    bgm = audio.play("opening", true);
+    bgm = await audio.play("opening", true);
   }
 
   _drawProgress(CanvasWrapper ctx) {
@@ -106,7 +106,7 @@ class TitleScene extends Scene with KeyBoardWatcher {
 
   @override
   destroy() {
-    bgm.stop();
+    bgm.release();
     keyboard.removeListener(this);
     state = Scene.SCENE_STATE_DESTORY;
     lock = null;

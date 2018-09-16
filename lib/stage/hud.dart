@@ -41,7 +41,7 @@ class HUD {
       ..onTapDown = _onTapDown
       ..onTapUp = _onTapUp;
     final dragRecognizer = ImmediateMultiDragGestureRecognizer()
-    ..onStart = (_) => _MyDrag(keyboard);
+    ..onStart = (offset) => _MyDrag(offset, keyboard);
     callback = (PointerEvent e) {
       final midX = c.game.size.width * .5;
       if (e is PointerDownEvent ) {
@@ -74,34 +74,52 @@ class HUD {
 }
 
 class _MyDrag extends Drag {
+  final Offset start;
   final Keyboard keyboard;
   int _lastKeyHold;
+  Offset dd;
 
-  _MyDrag(this.keyboard);
+  _MyDrag(this.start, this.keyboard){
+    dd = Offset(0.0, 0.0);
+  }
 
   @override
   void update(DragUpdateDetails details) {
-    print("drag update ${details.delta},${details.globalPosition}");
+    //print("drag update ${details.delta},${details.globalPosition}");
     num dx = details.delta.dx;
     num dy = details.delta.dy;
-    if(dx > 0) {
+    num slop = 5;
+    dd = dd.translate(dx, dy);
+
+    if(dd.dx.abs() <= slop && dd.dy.abs() <= slop) {
+      return;
+    }
+
+    if(dd.dx > slop) {
       if(_lastKeyHold != constants.keyRight) {
         if(keyboard != null) {
           keyboard.sendKeyEvent(_lastKeyHold, true);
         }
         keyboard.sendKeyEvent(constants.keyRight);
         _lastKeyHold = constants.keyRight;
+
       }
-      //right
-    } else if (dx < 0) {
+      dd = Offset(0.0, 0.0);
+      return;
+    }
+    if (dd.dx < -slop) {
       if(_lastKeyHold != constants.keyLeft) {
         if(keyboard != null) {
           keyboard.sendKeyEvent(_lastKeyHold, true);
         }
         keyboard.sendKeyEvent(constants.keyLeft);
         _lastKeyHold = constants.keyLeft;
+
       }
-    } else if (dy < 0) {
+      dd = Offset(0.0, 0.0);
+      return;
+    }
+    if (dd.dy < -slop) {
       if(_lastKeyHold != constants.keyUp) {
         if(keyboard != null) {
           keyboard.sendKeyEvent(_lastKeyHold, true);
@@ -109,7 +127,10 @@ class _MyDrag extends Drag {
         keyboard.sendKeyEvent(constants.keyUp);
         _lastKeyHold = constants.keyUp;
       }
-    } else if (dy > 0) {
+      dd = Offset(0.0, 0.0);
+      return;
+    }
+    if (dd.dy > slop) {
       if(_lastKeyHold != constants.keyDown) {
         if(keyboard != null) {
           keyboard.sendKeyEvent(_lastKeyHold, true);
@@ -117,6 +138,8 @@ class _MyDrag extends Drag {
         keyboard.sendKeyEvent(constants.keyDown);
         _lastKeyHold = constants.keyDown;
       }
+      dd = Offset(0.0, 0.0);
+      return;
     }
   }
 

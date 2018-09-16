@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 abstract class AudioManager {
   static const String lifLost = "Life Lost";
   static const String bomb = "bomb";
@@ -11,7 +13,7 @@ abstract class AudioManager {
 
   init();
 
-  SoundPlay play(String name, [loop = false]);
+  Future<SoundPlay> play(String name, [loop = false]);
 }
 
 abstract class SoundPlay  {
@@ -25,6 +27,8 @@ abstract class SoundPlay  {
   void start();
 
   void stop();
+
+  void release();
 
   void toggle() ;
 

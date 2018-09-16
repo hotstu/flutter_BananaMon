@@ -29,6 +29,7 @@ abstract class Treasure extends BaseChar {
 
   @override
   void destroy([bool sendEvent = true]) {
+    print('treasure destory');
     current.remove(this);
     stage.remove(this);
   }

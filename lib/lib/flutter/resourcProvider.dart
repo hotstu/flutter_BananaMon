@@ -48,29 +48,29 @@ class ResourceProvider {
     StreamController<int> controller;
     controller = StreamController(onListen: () async {
       if (desc == null) {
-        wall = await readFile("resource/sprite_bricks.png");
+        wall = await readFile("assets/resource/sprite_bricks.png");
         //TODO 返回具体文件大小
         //TODO 并行加载
         controller.add(1);
-        wallsolid = await readFile("resource/sprite_bricks_solid.png");
+        wallsolid = await readFile("assets/resource/sprite_bricks_solid.png");
         controller.add(2);
-        huaji = await readFile("resource/huaji90x90.png");
+        huaji = await readFile("assets/resource/huaji90x90.png");
         controller.add(3);
-        hero1 = await readFile("resource/hero1.png");
+        hero1 = await readFile("assets/resource/hero1.png");
         controller.add(4);
-        bomb1 = await readFile("resource/bomb1.png");
+        bomb1 = await readFile("assets/resource/bomb1.png");
         controller.add(5);
-        explosion = await readFile("resource/explosion.png");
+        explosion = await readFile("assets/resource/explosion.png");
         controller.add(6);
-        blocck_destory = await readFile("resource/block_destory.png");
+        blocck_destory = await readFile("assets/resource/block_destory.png");
         controller.add(7);
-        monster_destory = await readFile("resource/monster_destory.png");
+        monster_destory = await readFile("assets/resource/monster_destory.png");
         controller.add(8);
-        treasures = await readFile("resource/treasure.png");
+        treasures = await readFile("assets/resource/treasure.png");
         controller.add(9);
-        gate = await readFile("resource/gate.png");
+        gate = await readFile("assets/resource/gate.png");
         controller.add(10);
-        desc = jsonDecode(await readString("resource/desc.json"));
+        desc = jsonDecode(await readString("assets/resource/desc.json"));
         controller.add(11);
       }
 

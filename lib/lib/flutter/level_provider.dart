@@ -23,7 +23,7 @@ class LevelProvider extends base.LevelProvider {
 
   @override
   getRawData(String name) async {
-    final path = "resource/level/${name}.png";
+    final path = "assets/resource/level/${name}.png";
     return await readFile(path);
   }
 }

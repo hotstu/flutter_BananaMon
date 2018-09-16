@@ -39,6 +39,7 @@ class Stage extends Scene {
   AudioManager audio;
   SoundPlay bgmPlay;
   GameHandler _game;
+  Object tickLock;
 
   Stage(this._game, this.context)
       : levelProvider = inject.injectLevelProvider(),
@@ -93,8 +94,7 @@ class Stage extends Scene {
             case 14:
             case 15:
               for (var k = 0; k < monsterCount; ++k) {
-                monsterList
-                    .add(Monster("monster${i}-${j}-${k}", context, this, i, j));
+                monsterList.add(Monster("monster${i}-${j}-${k}", context, this, i, j));
               }
               break;
             default:
@@ -132,14 +132,15 @@ class Stage extends Scene {
         }
       }
     }
-    print(heroList.length);
-    print(wallList1.length);
-    print(wallList2.length);
-    print(monsterList.length);
+    print("init tr = ${treasureList.length}");
+    print("init mo = ${monsterList.length}");
+    print("init w2 = ${wallList2.length}");
+    print("init w1 = ${wallList1.length}");
     audio.play("starting");
     await delay(Duration(milliseconds: 2000));
-    bgmPlay = audio.play("playing", true);
+    bgmPlay = await audio.play("playing", true);
     state = Scene.SCENE_STATE_READY;
+    tickLock = null;
   }
 
   bool _paused = false;
@@ -160,12 +161,18 @@ class Stage extends Scene {
       return;
     }
     if (state == Scene.SCENE_STATE_INT) {
-      await _init();
+      if(tickLock == null) {
+        tickLock = 1;
+        await _init();
+      }
       return;
     }
-    if (!_paused) {
-      _think();
+    if (state == Scene.SCENE_STATE_READY) {
+      if (!_paused) {
+        _think();
+      }
     }
+
   }
 
   draw(CanvasWrapper ctx) {
@@ -253,6 +260,7 @@ class Stage extends Scene {
   void _draw() {
     //now only support one player!
     //canvas.rclearRect(-1, -1);
+    //print('treasure count ${treasureList.length}');
     wallList2.forEach((item) => item.draw(canvas));
     treasureList.forEach((item) => item.draw(canvas));
     wallList1.forEach((item) => item.draw(canvas));
@@ -313,7 +321,7 @@ class Stage extends Scene {
 
   @override
   void destroy() {
-    bgmPlay?.stop();
+    bgmPlay?.release();
     List.from(wallList1, growable: false).forEach((e) => e?.destroy(false));
     List.from(treasureList, growable: false).forEach((e) => e?.destroy(false));
     List.from(wallList2, growable: false).forEach((e) => e?.destroy(false));

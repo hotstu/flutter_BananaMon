@@ -17,6 +17,7 @@ dependencies:
   vector_math: ^2.0.8
   http: ^0.11.3+17
   tuple: ^1.0.2
+  audioplayers: ^0.7.6
   flutter:
     sdk: flutter
 
@@ -36,20 +37,30 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - resource/desc.json
-    - resource/block_destory.png
-    - resource/bomb1.png
-    - resource/explosion.png
-    - resource/gate.png
-    - resource/hero1.png
-    - resource/huaji90x90.png
-    - resource/monster_destory.png
-    - resource/sprite_bricks.png
-    - resource/sprite_bricks_solid.png
-    - resource/treasure.png
-    - resource/level/s1.png
-    - resource/level/s2.png
-    - resource/level/s3.png
+    - assets/resource/desc.json
+    - assets/resource/block_destory.png
+    - assets/resource/bomb1.png
+    - assets/resource/explosion.png
+    - assets/resource/gate.png
+    - assets/resource/hero1.png
+    - assets/resource/huaji90x90.png
+    - assets/resource/monster_destory.png
+    - assets/resource/sprite_bricks.png
+    - assets/resource/sprite_bricks_solid.png
+    - assets/resource/treasure.png
+    - assets/resource/level/s1.png
+    - assets/resource/level/s2.png
+    - assets/resource/level/s3.png
+    - assets/bomb.ogg
+    - assets/click.ogg
+    - assets/powerup.ogg
+    - assets/01_Title Screen.mp3
+    - assets/02_Stage Start.mp3
+    - assets/03_Stage Theme.mp3
+    - assets/04_Find The Exit.mp3
+    - assets/05_Stage Complete.mp3
+    - assets/08_Life Lost.mp3
+    - assets/bomb.ogg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.
