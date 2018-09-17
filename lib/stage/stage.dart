@@ -141,23 +141,23 @@ class Stage extends Scene {
     print("init w2 = ${wallList2.length}");
     print("init w1 = ${wallList1.length}");
     audio.play("starting");
+    state = Scene.SCENE_STATE_READY;
     await delay(Duration(milliseconds: 2000));
     bgmPlay = await audio.play("playing", true);
-    state = Scene.SCENE_STATE_READY;
-    tickLock = null;
   }
 
-  bool _paused = false;
 
   @override
   void pause() {
-    _paused = true;
+    print('stage pause');
+    bgmPlay?.stop();
   }
 
 
   @override
   void resume() {
-    _paused = false;
+    print('stage resume');
+    bgmPlay?.start();
   }
 
   tick() async {
@@ -172,9 +172,7 @@ class Stage extends Scene {
       return;
     }
     if (state == Scene.SCENE_STATE_READY) {
-      if (!_paused) {
-        _think();
-      }
+      _think();
     }
 
   }
@@ -353,6 +351,7 @@ class Stage extends Scene {
 
   @override
   void destroy() {
+    bgmPlay?.stop();
     bgmPlay?.release();
     List.from(wallList1, growable: false).forEach((e) => e?.destroy(false));
     List.from(treasureList, growable: false).forEach((e) => e?.destroy(false));

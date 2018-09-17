@@ -32,9 +32,9 @@ packages:
   audioplayers:
     dependency: "direct main"
     description:
-      name: audioplayers
-      url: "https://pub.flutter-io.cn"
-    source: hosted
+      path: audioplayer
+      relative: true
+    source: path
     version: "0.7.6"
   boolean_selector:
     dependency: transitive

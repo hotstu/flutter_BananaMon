@@ -113,6 +113,19 @@ class TitleScene extends Scene with KeyBoardWatcher {
   }
 
   @override
+  void pause() {
+    print('title pause');
+    bgm?.stop();
+  }
+
+
+  @override
+  void resume() {
+    print('title resume');
+    bgm?.start();
+  }
+
+  @override
   tick() {
     if (state == Scene.SCENE_STATE_DESTORY) {
       return;

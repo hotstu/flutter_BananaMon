@@ -19,6 +19,9 @@ abstract class Game {
   /// Implement this method to render the current game state in the [canvas].
   void render(Canvas canvas);
 
+  void destroy();
+  void init();
+
   /// This is the resize hook; every time the game widget is resized, this hook is called.
   ///
   /// The default implementation does nothing; override to use the hook.
@@ -39,14 +42,55 @@ abstract class Game {
   /// You can add it directly to the runApp method or inside your widget structure (if you use vanilla screens and widgets).
   Widget get widget {
     if (_widget == null) {
-      _widget = new Center(
-          child: new Directionality(
-              textDirection: TextDirection.ltr,
-              child: new _GameRenderObjectWidget(this)));
+      _widget = _LifeCyclerWatch(this);
     }
     return _widget;
   }
 }
+
+class _LifeCyclerWatch extends StatefulWidget {
+  final game;
+
+  _LifeCyclerWatch(this.game);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _LifeCyclerWatchState(game);
+  }
+}
+
+class _LifeCyclerWatchState extends State<_LifeCyclerWatch> {
+  final game;
+  _LifeCyclerWatchState(this.game);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: new Directionality(
+            textDirection: TextDirection.ltr,
+            child: _GameRenderObjectWidget(game)
+        )
+    );
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    print('====initState=====');
+    game?.init();
+  }
+
+  @override
+  void dispose() {
+    print('====dispose=====');
+    game?.destroy();
+    super.dispose();
+  }
+
+
+}
+
 
 class _GameRenderObjectWidget extends SingleChildRenderObjectWidget {
   final Game game;
@@ -91,7 +135,9 @@ class _GameRenderBox extends RenderBox with WidgetsBindingObserver {
     super.detach();
     _unscheduleTick();
     _unbindLifecycleListener();
+
   }
+
 
   void _scheduleTick() {
     _frameCallbackId = SchedulerBinding.instance.scheduleFrameCallback(_tick);
@@ -156,11 +202,8 @@ abstract class BaseGame extends Game {
   Size size;
 
 
-
   /// List of deltas used in debug mode to calculate FPS
   List<double> _dts = [];
-
-
 
 
   /// This implementation of render basically calls [renderComponent] for every component, making sure the canvas is reset for each one.
@@ -209,12 +252,12 @@ abstract class BaseGame extends Game {
   /// Returns 0 if empty.
   double fps([int average = 1]) {
     List<double> dts = _dts.sublist(math.max(0, _dts.length - average));
-    if (dts.isEmpty ) {
+    if (dts.isEmpty) {
       return 0.0;
     }
     double dtSum = dts.reduce((s, t) => s + t);
     double averageDt = dtSum / average;
-    if(averageDt == 0.0) {
+    if (averageDt == 0.0) {
       return 0.0;
     }
     return 1 / averageDt;

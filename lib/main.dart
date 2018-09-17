@@ -26,7 +26,7 @@ class MyGame extends BaseGame {
   Context context;
   HUD hud;
   CanvasWrapper wrapper;
-
+  MyGameHandler handler;
   MyGame() {
     started = false;
     map = new HashMap();
@@ -37,8 +37,26 @@ class MyGame extends BaseGame {
 
 
   @override
-  void lifecycleStateChange(AppLifecycleState state) {
+  void destroy() {
+    handler?.destroy();
   }
+
+  @override
+  void init() {
+    // TODO: implement init
+  }
+
+  @override
+  void lifecycleStateChange(AppLifecycleState state) {
+    print('lifecycleStateChange$state');
+    if(state == AppLifecycleState.paused) {
+      handler?.pause();
+    }
+    if(state == AppLifecycleState.resumed) {
+      handler?.resume();
+    }
+  }
+
 
   _renderFps(Canvas canvas) {
     TextPainter tp = TextPainter(
@@ -84,6 +102,7 @@ class MyGame extends BaseGame {
     }
   }
 
+
 }
 
 class MyGameHandler extends GameHandler {
@@ -109,12 +128,19 @@ class MyGameHandler extends GameHandler {
   }
 
   @override
+  void destroy() {
+    //TODO there would be a pain if we can't hook destory event in flutter?
+    game.map[game.senceName]?.destroy();
+    game.started = false;
+  }
+
+  @override
   void start(String name, [attr]) {
     print("start scene $name, attr=$attr");
     game.map[game.senceName]?.destroy();
     game.senceName = name;
     game.map[game.senceName]?.reset(attr);
-    game.map[game.senceName]?.resume();
+    //game.map[game.senceName]?.resume();
     game.started = true;
   }
 }
@@ -127,6 +153,7 @@ Future main() async {
   await SystemChrome.setEnabledSystemUIOverlays([]);
   MyGame game = MyGame();
   MyGameHandler iGame = MyGameHandler(game);
+  game.handler = iGame;
   TitleScene title = TitleScene(iGame);
   Stage stage = Stage(iGame, game.context);
   GameOverScene over = GameOverScene(iGame);

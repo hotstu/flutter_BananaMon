@@ -5,4 +5,5 @@ abstract class GameHandler {
   void start(String name, [attr]);
   void pause();
   void resume();
+  void destroy();
 }

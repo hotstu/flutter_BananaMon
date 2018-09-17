@@ -158,6 +158,9 @@ class Hero extends BaseChar with KeyBoardWatcher, Leg {
       print("_deployBomb reach  limit: ${_bombCount}");
       return;
     }
+    if (hp <= 0) {
+      return;
+    }
     //print("_deployBomb");
     Bomb b = CountDownBomb(
         "bomb", ctx, stage, this, _power, 2500, current.x, current.y);
