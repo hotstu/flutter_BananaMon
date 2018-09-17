@@ -19,7 +19,7 @@ class Monster extends BaseChar with Brain, Leg {
   num skillDistanceSqure = 20 * 20;
 
   int state = constants.stateNormal;
-  Animator anim = null;
+  Animator anim;
 
   Monster(String name, ctx, Stage stage, [int x = 0, int y = 0])
       : assert(name != null),

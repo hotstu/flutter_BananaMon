@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ui' hide Scene;
 
+import 'package:flutter/material.dart' hide Hero;
 
 import '../char/base_char.dart';
 import '../char/bomb.dart';
@@ -19,6 +21,7 @@ import 'stage_model.dart';
 import '../lib/flutter/projection.dart';
 import '../lib/injection.dart' as inject;
 import '../lib/constants.dart' as constants;
+import '../lib/flutter/canvas_wrapper.dart' as impl;
 
 class Stage extends Scene {
   final LevelProvider levelProvider;
@@ -39,6 +42,7 @@ class Stage extends Scene {
   AudioManager audio;
   SoundPlay bgmPlay;
   GameHandler _game;
+  Paint staticPaint;
   Object tickLock;
 
   Stage(this._game, this.context)
@@ -176,9 +180,15 @@ class Stage extends Scene {
   }
 
   draw(CanvasWrapper ctx) {
-    this.canvas = ctx;
-    _draw();
-    this.canvas = null;
+    if (state == Scene.SCENE_STATE_READY) {
+      this.canvas = ctx;
+      if(staticPaint == null) {
+        _drawStatic();
+      }
+      _draw();
+      this.canvas = null;
+    }
+
   }
 
   add(BaseChar char) {
@@ -261,22 +271,44 @@ class Stage extends Scene {
     //now only support one player!
     //canvas.rclearRect(-1, -1);
     //print('treasure count ${treasureList.length}');
-    wallList2.forEach((item) => item.draw(canvas));
+    //var d = DateTime.now().microsecondsSinceEpoch.toDouble();
+    // draw staticPaint;
+    var canvasimpl = canvas as impl.CanvasWrapper;
+    canvasimpl.ctx.drawPaint(staticPaint);
+
     treasureList.forEach((item) => item.draw(canvas));
     wallList1.forEach((item) => item.draw(canvas));
     expList.forEach((item) => item.draw(canvas));
     bombList.forEach((item) => item.draw(canvas));
     monsterList.forEach((item) => item.draw(canvas));
     heroList.forEach((item) => item.draw(canvas));
+   // print("_draw cost ${DateTime.now().microsecondsSinceEpoch.toDouble() - d}");
+  }
+
+  /**
+   * 这个方法破坏了抽象，只对flutter有用，
+   */
+  void _drawStatic() {
+    PictureRecorder rec = PictureRecorder();
+    Canvas rawCanvas = Canvas(rec,Rect.fromLTWH(0.0, 0.0, context.p_width.toDouble(), context.p_height.toDouble()));
+    rawCanvas.drawColor(Colors.brown, BlendMode.src);
+    CanvasWrapper stageCanvas = impl.CanvasWrapper(rawCanvas, context);
+    wallList2.forEach((item) => item.draw(stageCanvas));
+    Picture picture = rec.endRecording();
+    staticPaint = Paint();
+    staticPaint.shader = ImageShader(picture.toImage(context.p_width.toInt(), context.p_height.toInt()),
+        TileMode.clamp, TileMode.clamp, Matrix4.identity().storage);
   }
 
   void _think() {
+    //var d = DateTime.now().microsecondsSinceEpoch.toDouble();
     List.from(heroList, growable: false).forEach((item) => item.tick());
     //wallList2.forEach((item) => item.tick());
     List.from(wallList1, growable: false).forEach((item) => item.tick());
     List.from(monsterList, growable: false).forEach((item) => item.tick());
     List.from(bombList, growable: false).forEach((item) => item.tick());
     List.from(expList, growable: false).forEach((item) => item.tick());
+    //print("tick cost ${DateTime.now().microsecondsSinceEpoch.toDouble() - d}");
   }
 
   Future _ifWin() async {
@@ -330,6 +362,8 @@ class Stage extends Scene {
     List.from(bombList, growable: false).forEach((e) => e?.destroy(false));
     List.from(expList, growable: false).forEach((e) => e?.destroy(false));
     state = Scene.SCENE_STATE_DESTORY;
+    tickLock = null;
+    staticPaint = null;
   }
 
   @override

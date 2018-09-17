@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:ui' hide TextStyle;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,12 +25,14 @@ class MyGame extends BaseGame {
   String senceName;
   Context context;
   HUD hud;
+  CanvasWrapper wrapper;
 
   MyGame() {
     started = false;
     map = new HashMap();
     context = Context(this, 1240, 600, constatns.logicalWidth, constatns.logicalHeight);
     hud = HUD(context);
+    wrapper = CanvasWrapper(null, context);
   }
 
 
@@ -57,13 +60,13 @@ class MyGame extends BaseGame {
 
   @override
   render(Canvas canvas) {
-    canvas.drawColor(Colors.brown, BlendMode.src);
+
     canvas.save();
     num sx = size.width / context.p_width;
     num sy = size.height / context.p_height;
     //print("reander $size");
     canvas.scale(sx, sy);
-    CanvasWrapper wrapper = CanvasWrapper(canvas, context);
+    wrapper.ctx = canvas;
     map[senceName]?.draw(wrapper);
     hud.draw(canvas);
     canvas.restore();
@@ -109,11 +112,9 @@ class MyGameHandler extends GameHandler {
   void start(String name, [attr]) {
     print("start scene $name, attr=$attr");
     game.map[game.senceName]?.destroy();
-    print("start scene 2");
     game.senceName = name;
     game.map[game.senceName]?.reset(attr);
     game.map[game.senceName]?.resume();
-    print("start scene 3");
     game.started = true;
   }
 }

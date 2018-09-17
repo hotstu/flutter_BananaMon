@@ -19,7 +19,7 @@ class StageLoaderScene extends Scene {
 
   StageLoaderScene(this.game)
       : resourceProvider = inject.injectResourceProvider(),
-        audio = inject.injectAudio() {}
+        audio = inject.injectAudio();
 
 
   Future _drawOnce() async {
@@ -58,7 +58,6 @@ class StageLoaderScene extends Scene {
 
   @override
   tick() async {
-    print("loader tick");
     if (state == Scene.SCENE_STATE_DESTORY) {
       return;
     }
@@ -78,7 +77,6 @@ class StageLoaderScene extends Scene {
 
   @override
   draw(CanvasWrapper ctx) {
-    print("loader draw");
 
     if (state == Scene.SCENE_STATE_DESTORY) {
       return;

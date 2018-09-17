@@ -31,7 +31,22 @@ class AudioManager implements base.AudioManager {
     StreamController<int> controller;
 
     controller = StreamController(onListen: () async {
-      //await audioCache.load(mapping["bomb"]);
+      await audioCache.load(mapping["bomb"]);
+      controller.add(1);
+      await audioCache.load(mapping["click"]);
+      controller.add(2);
+      await audioCache.load(mapping["powerup"]);
+      controller.add(3);
+      await audioCache.load(mapping["opening"]);
+      controller.add(4);
+      await audioCache.load(mapping["starting"]);
+      controller.add(5);
+      await audioCache.load(mapping["playing"]);
+      controller.add(6);
+      await audioCache.load(mapping["Life Lost"]);
+      controller.add(7);
+      await audioCache.load(mapping["Stage Complete"]);
+      controller.add(8);
       controller.close();
     });
     return controller.stream;
@@ -39,8 +54,8 @@ class AudioManager implements base.AudioManager {
 
   @override
   Future<SoundPlay> play(String name, [loop = false]) async {
-    //SoundPlay play = SoundPlay(await audioCache.play(mapping[name]));
-    SoundPlay play = SoundPlay(null);
+    SoundPlay play = SoundPlay(await audioCache.play(mapping[name]));
+    //SoundPlay play = SoundPlay(null);
     play.loop = loop;
     play.start();
     return play;

@@ -11,10 +11,10 @@ import 'projection.dart';
 
 
 class CanvasWrapper implements base.CanvasWrapper {
-  final Canvas ctx;
   final Context C;
 
   Paint _clearPaint;
+  Canvas ctx;
   Paint _colorPaint;
   Paint _tilePaint;
   TextPainter _textPainter;
@@ -24,8 +24,7 @@ class CanvasWrapper implements base.CanvasWrapper {
   bool _dirty = true;
   String _lastText;
 
-
-  CanvasWrapper(this.ctx,this.C) {
+  CanvasWrapper(this.ctx, this.C) {
     _clearPaint = Paint();
     _clearPaint.blendMode = BlendMode.clear;
     _clearPaint.style = PaintingStyle.fill;
@@ -41,14 +40,14 @@ class CanvasWrapper implements base.CanvasWrapper {
   void setBrush(String colorstr) {
     var color = ColorParser(colorstr);
     _colorPaint.color = color;
-    if(_textColor != color) {
+    if (_textColor != color) {
       _textColor = color;
       _dirty = true;
     }
   }
 
   _ensureTextPaint(String text) {
-    if(_textPainter == null || _dirty|| _lastText != text) {
+    if (_textPainter == null || _dirty || _lastText != text) {
       _dirty = false;
       _lastText = text;
       _textPainter = TextPainter(
@@ -62,7 +61,6 @@ class CanvasWrapper implements base.CanvasWrapper {
               ))
       );
     }
-
   }
 
 
@@ -75,23 +73,26 @@ class CanvasWrapper implements base.CanvasWrapper {
 
   @override
   void setFont(String font) {
-    if(_textFont != font) {
+    if (_textFont != font) {
       _textFont = font;
       _dirty = true;
     }
-
   }
 
   @override
   void clearRect(int x, int y) {
     var pyP = C.lo2pyProjection(Vector2(x.toDouble(), y.toDouble()));
-    ctx.drawRect(Rect.fromLTWH(pyP.x, pyP.y, C.CELL_SIZE_W.toDouble(), C.CELL_SIZE_H.toDouble()), _clearPaint);
+    ctx.drawRect(Rect.fromLTWH(
+        pyP.x, pyP.y, C.CELL_SIZE_W.toDouble(), C.CELL_SIZE_H.toDouble()),
+        _clearPaint);
   }
 
   @override
   void fillRect(int x, int y) {
     var pyP = C.lo2pyProjection(Vector2(x.toDouble(), y.toDouble()));
-    ctx.drawRect(Rect.fromLTWH(pyP.x, pyP.y, C.CELL_SIZE_W.toDouble(), C.CELL_SIZE_H.toDouble()), _colorPaint);
+    ctx.drawRect(Rect.fromLTWH(
+        pyP.x, pyP.y, C.CELL_SIZE_W.toDouble(), C.CELL_SIZE_H.toDouble()),
+        _colorPaint);
   }
 
   @override
@@ -107,7 +108,7 @@ class CanvasWrapper implements base.CanvasWrapper {
   @override
   void rfillText(num x, num y, String text, [num maxWidth]) {
     ctx.save();
-    ctx.translate(-x.toDouble() , -y.toDouble());
+    ctx.translate(-x.toDouble(), -y.toDouble());
     _ensureTextPaint(text);
     _textPainter.paint(ctx, Offset.zero);
     ctx.restore();
@@ -117,18 +118,22 @@ class CanvasWrapper implements base.CanvasWrapper {
   @override
   void rclearRect(num x, num y) {
     if (x == -1 && y == -1) {
-      ctx.drawRect(Rect.fromLTWH(0.0, 0.0, C.p_width.toDouble(), C.p_height.toDouble()), _clearPaint);
+      ctx.drawRect(
+          Rect.fromLTWH(0.0, 0.0, C.p_width.toDouble(), C.p_height.toDouble()),
+          _clearPaint);
     } else {
-      ctx.drawRect(Rect.fromLTWH(x.toDouble(), y.toDouble(), C.CELL_SIZE_W.toDouble(), C.CELL_SIZE_H.toDouble()),_clearPaint);
+      ctx.drawRect(Rect.fromLTWH(
+          x.toDouble(), y.toDouble(), C.CELL_SIZE_W.toDouble(),
+          C.CELL_SIZE_H.toDouble()), _clearPaint);
     }
   }
 
   @override
   void rfillRect(num x, num y) {
-    ctx.drawRect(Rect.fromLTWH(x.toDouble(), y.toDouble(), C.CELL_SIZE_W.toDouble(), C.CELL_SIZE_H.toDouble()), _colorPaint);
+    ctx.drawRect(Rect.fromLTWH(
+        x.toDouble(), y.toDouble(), C.CELL_SIZE_W.toDouble(),
+        C.CELL_SIZE_H.toDouble()), _colorPaint);
   }
-
-
 
   @override
   void rdrawImage(Sprite drawable, Rectangle<num> rect) {
@@ -140,10 +145,12 @@ class CanvasWrapper implements base.CanvasWrapper {
     Rect dRect = Rect.fromLTWH(
         rect.left + drawable.dst.left + .0,
         rect.top + drawable.dst.top + .0,
-        drawable.dst.width <= 0 ? C.CELL_SIZE_W.toDouble() : drawable.dst.width.toDouble(),
-        drawable.dst.height <= 0 ? C.CELL_SIZE_H.toDouble() : drawable.dst.height.toDouble());
-    ctx.drawImageRect(C.obtainSoureByName(drawable.sourceId), srcRect, dRect, _tilePaint);
-
+        drawable.dst.width <= 0 ? C.CELL_SIZE_W.toDouble() : drawable.dst.width
+            .toDouble(),
+        drawable.dst.height <= 0 ? C.CELL_SIZE_H.toDouble() : drawable.dst
+            .height.toDouble());
+    ctx.drawImageRect(
+        C.obtainSoureByName(drawable.sourceId), srcRect, dRect, _tilePaint);
   }
 
 
@@ -177,11 +184,9 @@ class CanvasWrapper implements base.CanvasWrapper {
     ctx.rotate(angle + .0);
   }
 
-  // TODO: implement height
   @override
   num get height => C.p_height;
 
-  // TODO: implement width
   @override
   num get width => C.p_width;
 

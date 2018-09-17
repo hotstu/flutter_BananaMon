@@ -175,7 +175,7 @@ abstract class BaseGame extends Game {
   /// It also actually adds the components that were added by the [addLater] method, and remove those that are marked for destruction via the [Component.destroy] method.
   /// You can override it futher to add more custom behaviour.
   @override
-  void update(double t) ;
+  void update(double t);
 
   /// This implementation of resize repasses the resize call to every component in the list, enabling each one to make their decisions as how to handle the resize.
   ///
