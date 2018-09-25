@@ -2,6 +2,8 @@
 
 A new bombman-like game in flutter
 
+<img src="1.png" width="400">
+
 [download android app](https://github.com/hotstu/flutter_BananaMon/releases)
 
 ## control
