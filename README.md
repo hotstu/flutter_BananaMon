@@ -1,8 +1,8 @@
-# flutter_another
+# flutter_bananaMon
 
-A new Flutter application.
+A new bombman-like game in flutter
 
-## Getting Started
+there is also a [html5 versio](https://github.com/hotstu/BananaMon) available which contains a stage editor
 
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
+## control
+touch left side of screen to move, touch right side of screen to deploy bomb 
