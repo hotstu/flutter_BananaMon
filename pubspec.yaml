@@ -52,7 +52,6 @@ flutter:
     - assets/resource/level/s1.png
     - assets/resource/level/s2.png
     - assets/resource/level/s3.png
-    - assets/bomb.ogg
     - assets/click.ogg
     - assets/powerup.ogg
     - assets/01_Title Screen.mp3
