@@ -78,7 +78,6 @@ class MyGame extends BaseGame {
 
   @override
   render(Canvas canvas) {
-
     canvas.save();
     num sx = size.width / context.p_width;
     num sy = size.height / context.p_height;

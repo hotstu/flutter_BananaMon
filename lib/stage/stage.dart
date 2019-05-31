@@ -142,6 +142,7 @@ class Stage extends Scene {
     print("init w1 = ${wallList1.length}");
     audio.play("starting");
     state = Scene.SCENE_STATE_READY;
+    staticPaint = await _drawStatic();
     await delay(Duration(milliseconds: 2000));
     bgmPlay = await audio.play("playing", true);
   }
@@ -177,12 +178,9 @@ class Stage extends Scene {
 
   }
 
-  draw(CanvasWrapper ctx) {
+  draw(CanvasWrapper ctx) async {
     if (state == Scene.SCENE_STATE_READY) {
       this.canvas = ctx;
-      if(staticPaint == null) {
-        _drawStatic();
-      }
       _draw();
       this.canvas = null;
     }
@@ -272,8 +270,10 @@ class Stage extends Scene {
     //var d = DateTime.now().microsecondsSinceEpoch.toDouble();
     // draw staticPaint;
     var canvasimpl = canvas as impl.CanvasWrapper;
-    canvasimpl.ctx.drawPaint(staticPaint);
+    if(staticPaint != null) {
+      canvasimpl.ctx.drawPaint(staticPaint);
 
+    }
     treasureList.forEach((item) => item.draw(canvas));
     wallList1.forEach((item) => item.draw(canvas));
     expList.forEach((item) => item.draw(canvas));
@@ -283,19 +283,18 @@ class Stage extends Scene {
    // print("_draw cost ${DateTime.now().microsecondsSinceEpoch.toDouble() - d}");
   }
 
-  /**
-   * 这个方法破坏了抽象，只对flutter有用，
-   */
-  void _drawStatic() {
+  /// 这个方法破坏了抽象，只对flutter有用，
+  Future _drawStatic() async {
     PictureRecorder rec = PictureRecorder();
     Canvas rawCanvas = Canvas(rec,Rect.fromLTWH(0.0, 0.0, context.p_width.toDouble(), context.p_height.toDouble()));
     rawCanvas.drawColor(Colors.brown, BlendMode.src);
     CanvasWrapper stageCanvas = impl.CanvasWrapper(rawCanvas, context);
     wallList2.forEach((item) => item.draw(stageCanvas));
     Picture picture = rec.endRecording();
-    staticPaint = Paint();
-    staticPaint.shader = ImageShader(picture.toImage(context.p_width.toInt(), context.p_height.toInt()),
+    var paint = Paint();
+    paint.shader = ImageShader(await picture.toImage(context.p_width.toInt(), context.p_height.toInt()),
         TileMode.clamp, TileMode.clamp, Matrix4.identity().storage);
+    return paint;
   }
 
   void _think() {
